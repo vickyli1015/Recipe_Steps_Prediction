@@ -223,7 +223,3 @@ Here is a plot of the distribution of test statistics.
 
 **Conclusion**: Since the p-value is > 0.05, and that the observed statistic is not very far off from many of the test statistics, we **fail to reject** that the Final Model is fair when it predicts number of steps for recipes with a high rating and a not so high rating, with a significance level of 5%.
 <!-- #endregion -->
-
-```python
-
-```
