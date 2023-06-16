@@ -1,6 +1,7 @@
 <!-- #region -->
 # Spice Up Your Models: Decoding Recipe Step Predictions
 Predicting the Number of Steps in a Recipe Using Models
+
 by Vicky Li: <yil164@ucsd.edu>
 
 Our exploratory data analysis on this dataset can be found [here](https://vickyli1015.github.io/Recipes-Rating-Analysis/)
@@ -192,6 +193,21 @@ There are a lot of possibilities for average ratings, and the frequency of each 
 **Test Statistic**: difference between the RMSE of high-rating recipes and the RMSE of the recipes with not so high ratings. (RMSE_high_rating_recipes - RMSE_low_rating_recipes)
 
 **Significance Level**: 5%
+
+To test the null hypothesis, I
+
+
+<iframe src="'/Users/vickyli/Dropbox/My Mac (Vicky的MacBook Air)/Desktop/Recipe_Steps_Prediction/data_vis/fairness_permutaion.html'" width=800 height=600 frameBorder=0></iframe>
+
+**p_value:**
+
+```py
+>>> p_value = (np.array(stats) < observed_stat).mean()
+>>> p_value
+0.174
+```
+
+**Conclusion**: Since the p-value is > 0.05, we fail to reject that the Final Model is fair when it predicts number of steps for recipes with a high rating and a not so high rating, with a significance level of 5%.
 <!-- #endregion -->
 
 ```python
