@@ -138,9 +138,9 @@ By exploring the frequency of some possible values for *average rating*, we foun
 ```py
 recipes['average_rating'].value_counts().iloc[:10]
 ```
-
-| 5.000000 | 47784 |
+| Value    | Count |
 |----------|-------|
+| 5.000000 | 47784 |
 | 4.000000 | 12217 |
 | 4.500000 | 4821  |
 | 3.000000 | 2508  |
@@ -170,7 +170,7 @@ recipes['average_rating'].value_counts().iloc[-10:]
 
 ```py
 #There are 402 unique average rating values!
-print(pd.Series(recipes['average_rating'].unique()).shape[0])
+>>> print(pd.Series(recipes['average_rating'].unique()).shape[0])
 402
 ```
 
