@@ -35,9 +35,10 @@ The model has been tested using **train-test-split** to evaluate the model's abi
 
 However, consider the mean and quantiles of the number of steps (shown below), 
 
-| count | 83782.000000 |
+| Statistic Type | Statistic  Value |
 |-------|--------------|
-| mean  | 10.105440    |
+| count | 83782.000000 |
+|  mean | 10.105440    |
 | std   | 6.390109     |
 | min   | 1.000000     |
 | 25%   | 6.000000     |
@@ -59,8 +60,9 @@ For *minutes*:
 recipes['minutes'].describe()
 ```
 
-| count | 8.378200e+04 |
+| Statistic Type | Statistic  Value |
 |-------|--------------|
+| count | 8.378200e+04 |
 | mean  | 1.150309e+02 |
 | std   | 3.990871e+03 |
 | min   | 0.000000e+00 |
@@ -83,15 +85,18 @@ For *n_ingredients* column:
 recipes['n_ingredients'].describe()
 ```
 
-| count | 83782.000000 |
-|-------|--------------|
-| mean  | 9.214020     |
-| std   | 3.830465     |
-| min   | 1.000000     |
-| 25%   | 6.000000     |
-| 50%   | 9.000000     |
-| 75%   | 12.000000    |
-| max   | 37.000000    |
+| Value | Count |
+|----------------|-----------------|
+| 5.000000       | 47784           |
+| 4.000000       | 12217           |
+| 4.500000       | 4821            |
+| 3.000000       | 2508            |
+| 4.666667       | 2265            |
+| 4.750000       | 1283            |
+| 4.333333       | 1170            |
+| 4.800000       | 858             |
+| 3.500000       | 662             |
+| 2.000000       | 618             |
 
 you can see that the distribution for the number of ingredients is still skewed here, since mean > median (50%), however it is much better than the *minutes* column. 
 - Still, we want to address outliers! a **StandardScaler** reduces the effect of the outliers by **centering all values around zero and having a unit variance**, which allows the linear regression model (and regression models in general) to assign a more appropriate weight and attention to each feature value.
@@ -123,11 +128,68 @@ The best hyperparameter for "max_depth" is 10, and 200 for "min_samples_split".
 
 By training the dataset using the optimal hyperparameters, (train_set_RMSE, test_set_RMSE) reduces to (5.374887598821211, 5.492137521112). 
 
-Compared to the baseline model, the **RMSE overall has decreased by around 0.4-0.5**, from which we can see that the model performance has improved by some extent by using a new regression model and doing feature transformations. The difference between RMSE for the training set and the test set has increased, but even though the problem of **overfitting, which is one of the natural disadvantages of a Decision Tree, is moderately more explicit, the model does optimize accuracy overall!**
+Compared to the baseline model, the **RMSE overall has decreased by around 0.4-0.5**, from which we can see that the model performance has improved by some extent by using a new regression model and doing feature transformations that address for effects of outliers. The difference between RMSE for the training set and the test set has increased, but even though the problem of **overfitting, which is one of the natural disadvantages of a Decision Tree, is moderately more explicit, the model does optimize accuracy overall!**
 
-Trying to push this !!
 
 ## Fairness Analysis
+
+By exploring the frequency of some possible values for *average rating*, we found that there are high rating values ((average rating >= 4) with high frequency, but there are also high rating values that has low frequency. The same applies for lower ratings values (average rating < 4)
+
+```py
+recipes['average_rating'].value_counts().iloc[:10]
+```
+
+| 5.000000 | 47784 |
+|----------|-------|
+| 4.000000 | 12217 |
+| 4.500000 | 4821  |
+| 3.000000 | 2508  |
+| 4.666667 | 2265  |
+| 4.750000 | 1283  |
+| 4.333333 | 1170  |
+| 4.800000 | 858   |
+| 3.500000 | 662   |
+| 2.000000 | 618   |
+
+
+```py
+recipes['average_rating'].value_counts().iloc[-10:]
+```
+| Value    | Count |
+|----------|-------|
+| 4.280000 | 1     |
+| 4.628571 | 1     |
+| 4.382353 | 1     |
+| 4.656250 | 1     |
+| 4.638298 | 1     |
+| 4.584906 | 1     |
+| 4.805556 | 1     |
+| 4.238095 | 1     |
+| 2.800000 | 1     |
+| 4.541667 | 1     |
+
+```py
+#There are 402 unique average rating values!
+print(pd.Series(recipes['average_rating'].unique()).shape[0])
+402
+```
+
+There are a lot of possibilities for average ratings, and the frequency of each differs a lot! Let's see if those factors make a difference for predictions of number of steps!
+
+**Group X**: recipes that has average rating >= 4 (high-rating recipes)
+
+**Group Y**: recipes that has average rating < 4 (not high-rating recipes)
+
+**Evaluation Metric**: since we care about how far off the predictions of number of steps are from the actual number of steps for recipes in both groups, we use RMSE.
+
+#### Hypothesis Set-Up:
+
+- **Null Hypothesis**: Our model is fair. Its RMSE for high-rating recipes and not high-rating recipes are roughly the same, and any differences are due to random chance.
+- **Alternative Hypothesis**: Our model is unfair. Its RMSE for high-rating recipes is lower than its RMSE for not high-rating recipes. i.e., the model is more likely to predict the n_steps of high-rating recipes with smaller errors (RMSE).
+
+**Test Statistic**: difference between the RMSE of high-rating recipes and the RMSE of the recipes with not so high ratings. (RMSE_high_rating_recipes - RMSE_low_rating_recipes)
+
+**Significance Level**: 5%
 <!-- #endregion -->
 
 ```python
