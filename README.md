@@ -4,7 +4,7 @@ Predicting the Number of Steps in a Recipe Using Models
 
 by Vicky Li: <yil164@ucsd.edu>
 
-Our exploratory data analysis on this dataset can be found [here](https://vickyli1015.github.io/Recipes-Rating-Analysis/)
+Our exploratory data analysis on this dataset can be found [here](https://vickyli1015.github.io/Recipes-Rating-Analysis/).
 
 ## Framing the Problem
 
@@ -106,7 +106,7 @@ you can see that the distribution for the number of ingredients is still skewed 
 Overall, I believe that this transformer helps reduce the noise from the outliers, while also ensuring the transformed values help the linear regression models to perform better when estimating the intercept and coefficients.
 
 After applying those transformers, we get (train_set_RMSE, test_set_RMSE) == (5.52111626057998, 5.581885926716189). 
-- The difference in RMSE between the training set and the test set has decreased, which means **the model predicts better on unseen data**, but overall they are still high in the sense that 5 steps are 1/2 of the average steps we typically see! 
+- The difference in RMSE between the training set and the test set has decreased/is roughly the same, which means **the model predicts better/the same on unseen data**, but overall they are still high in the sense that 5 steps are 1/2 of the average steps we typically see! 
 - Therefore, **the Linear Regression Model may be essentially not suitable for this predition**, such that feature transforming does not help. Reasons for that may be the relationship between the features and the number of steps (n_steps) is not linear, and the fact that there is not really a lot of options of hyperparameters to choose from (if any).
 
 --- 
@@ -117,19 +117,24 @@ The hyperparameters I plan to tune are **"max_depth"** and **"min_samples_split"
 
 - We want to have the best min_samples_split. min_samples_split helps control the complexity of the decision tree model since it **specifies the minimum number of samples required to split an internal node**. The larger it is, it is more general, but it can underfit. The smaller it is, the more complicated it is, so it can overfit. Therefore, it is so important to find a balance here! Also, the best min_samples_split should make the model general enough that **there is a concrete set of rules that predicts their relationships*.
 
-By using **GridSearchCV** over a list of hyperparameter options,
+By using **GridSearchCV** over a list of hyperparameter options (below),
 
 ```py
-hp = {
+>>> hyperparameter_list = {
     'max_depth': [2, 3, 4, 5, 7, 10, 13, 15, 18, 20, None], 
     'min_samples_split': [2, 5, 10, 20, 50, 100, 200]
-}
+    }
+>>> searcher = GridSearchCV(DecisionTreeRegressor(), hp, cv=5)
+>>> searcher.fit(X_train, y_train)
+>>> best = searcher.best_params_
+>>> best
+{'max_depth': 10, 'min_samples_split': 200}
 ```
-The best hyperparameter for "max_depth" is 10, and 200 for "min_samples_split".
+we found that the best hyperparameter for "max_depth" is 10, and 200 for "min_samples_split".
 
-By training the dataset using the optimal hyperparameters, (train_set_RMSE, test_set_RMSE) reduces to (5.374887598821211, 5.492137521112). 
+By training the model using the optimal hyperparameters, (train_set_RMSE, test_set_RMSE) reduces to (5.374887598821211, 5.492137521112). 
 
-Compared to the baseline model, the **RMSE overall has decreased by around 0.4-0.5**, from which we can see that the model performance has improved by some extent by using a new regression model and doing feature transformations that address for effects of outliers. The difference between RMSE for the training set and the test set has increased, but even though the problem of **overfitting, which is one of the natural disadvantages of a Decision Tree, is moderately more explicit, the model does optimize accuracy overall!**
+Compared to the baseline model, the **RMSE overall has decreased by around 0.4-0.5 (steps)**, from which we can see that the model performance has improved by some extent by using a new regression model and doing feature transformations that address for effects of outliers. The difference between RMSE for the training set and the test set has increased, but even though the problem of **overfitting, which is one of the natural disadvantages of a Decision Tree, is moderately more explicit, the model does optimize accuracy overall!**
 
 
 ## Fairness Analysis
@@ -194,20 +199,27 @@ There are a lot of possibilities for average ratings, and the frequency of each 
 
 **Significance Level**: 5%
 
-To test the null hypothesis, I
+#### Permutaion Test
+During each permutation iteration out of the 1000 permutations:
+- I shuffle the average ratings randomly. By doing so, each recipe may now have a high/low average rating instead of being fixed.
+- I **predict the number of steps using the Final Model with features (minutes and number of ingredients) of recipes with high ratings and recipes with low ratings separately**. 
+- Lastly, I calculate their RMSE and their differences (test statistic).
 
+Finally, I compare the list of test statistics with the observed statistic derived from our original dataset to calculate the p-value.
 
-<iframe src="'/Users/vickyli/Dropbox/My Mac (Vicky的MacBook Air)/Desktop/Recipe_Steps_Prediction/data_vis/fairness_permutaion.html'" width=800 height=600 frameBorder=0></iframe>
-
-**p_value:**
+**p-value:**
 
 ```py
 >>> p_value = (np.array(stats) < observed_stat).mean()
 >>> p_value
-0.174
+0.191
 ```
 
-**Conclusion**: Since the p-value is > 0.05, we fail to reject that the Final Model is fair when it predicts number of steps for recipes with a high rating and a not so high rating, with a significance level of 5%.
+Here is a plot of the distribution of test statistics.
+
+<iframe src="'/Users/vickyli/Dropbox/My Mac (Vicky的MacBook Air)/Desktop/Recipe_Steps_Prediction/data_vis/fairness_permutaion.html'" width=800 height=600 frameBorder=0></iframe>
+
+**Conclusion**: Since the p-value is > 0.05, and that the observed statistic is not very far off from many of the test statistics, we **fail to reject** that the Final Model is fair when it predicts number of steps for recipes with a high rating and a not so high rating, with a significance level of 5%.
 <!-- #endregion -->
 
 ```python
