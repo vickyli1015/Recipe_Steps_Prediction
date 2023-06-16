@@ -18,6 +18,8 @@ For this question, I am going to use **RMSE** as the metric to evaluate the mode
 
 ## Baseline Model
 
+(Note: the statistics mentioned below may be different in the notebook since I rerun the whole notebook before submission, but you the typically follow the same trend described below)
+
 Given the dataset containing recipe and ratings information as shown below: 
 
 (notice that for some columns that contains long strings/list of long strings, only the first few words/items are included for readability)
@@ -212,7 +214,7 @@ Finally, I compare the list of test statistics with the observed statistic deriv
 ```py
 >>> p_value = (np.array(stats) < observed_stat).mean()
 >>> p_value
-0.191
+0.175
 ```
 
 Here is a plot of the distribution of test statistics.
@@ -220,7 +222,3 @@ Here is a plot of the distribution of test statistics.
 
 **Conclusion**: Since the p-value is > 0.05, and that the observed statistic is not very far off from many of the test statistics, we **fail to reject** that the Final Model is fair when it predicts number of steps for recipes with a high rating and a not so high rating, with a significance level of 5%.
 <!-- #endregion -->
-
-```python
-
-```
