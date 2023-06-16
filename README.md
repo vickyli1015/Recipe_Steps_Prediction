@@ -1,3 +1,4 @@
+<!-- #region -->
 # Spice Up Your Models: Decoding Recipe Step Predictions
 Predicting the Number of Steps in a Recipe Using Models
 by Vicky Li: <yil164@ucsd.edu>
@@ -46,11 +47,86 @@ However, consider the mean and quantiles of the number of steps (shown below),
 
 apparently most of the recipes have a number of steps <= 13, which means a RMSE of around 5 steps is actually pretty high. Therefore, it may be an evidence of **underfitting**, i.e., the model is not complex enough to predict the number of steps with a higher accuracy so that it results in a lower RMSE for even only the training set.
 
-Since the model is underfitting that much that it mis-predicts 1/2 of the mean number of steps, I would say that the model is not good enough and there is absolutely a better model out there.
+Since the model is underfitting that much that it mis-predicts 1/2 of the mean number of steps, I would say that **the model is not good enough** and there is absolutely a better model out there.
 
 ## Final Model
 
+For the final model, I started off by transforming the features present in the baseline model. 
+
+For *minutes*: 
+
+```py
+recipes['minutes'].describe()
+```
+
+| count | 8.378200e+04 |
+|-------|--------------|
+| mean  | 1.150309e+02 |
+| std   | 3.990871e+03 |
+| min   | 0.000000e+00 |
+| 25%   | 2.000000e+01 |
+| 50%   | 3.500000e+01 |
+| 75%   | 6.500000e+01 |
+| max   | 1.051200e+06 |
+
+
+considering that ***minutes* span from one digit to a million**, I wanted to make the numbers smaller/more concentrated, especially the outliters, which evidently makes mean to be even larger than 75th percentile (75%) here. **Outliers may have a significant impact on the linear regression model and it needs to be addressed!** a **QuantileTransformer** is robust to outliers. 
+
+- It also preserves the relative **order and distribution** of the *minutes* values, while also provides a straight-forward interpretation of where each *minutes* value sits in the overall *minutes* values.
+- It 
+
+Overall, I believe that this transformer helps reduce the noise from the outliers.
+
+For *n_ingredients* column:
+
+```py
+recipes['n_ingredients'].describe()
+```
+
+| count | 83782.000000 |
+|-------|--------------|
+| mean  | 9.214020     |
+| std   | 3.830465     |
+| min   | 1.000000     |
+| 25%   | 6.000000     |
+| 50%   | 9.000000     |
+| 75%   | 12.000000    |
+| max   | 37.000000    |
+
+you can see that the distribution for the number of ingredients is still skewed here, since mean > median (50%), however it is much better than the *minutes* column. 
+- Still, we want to address outliers! a **StandardScaler** reduces the effect of the outliers by **centering all values around zero and having a unit variance**, which allows the linear regression model (and regression models in general) to assign a more appropriate weight and attention to each feature value.
+- Using a StandardScaler **makes the regression coefficients more meaningful** as they represent the change in the number of steps (y) associated with a one-standard-deviation change in the 'n_ingredients' feature
+
+Overall, I believe that this transformer helps reduce the noise from the outliers, while also ensuring the transformed values help the linear regression models to perform better when estimating the intercept and coefficients.
+
+After applying those transformers, we get (train_set_RMSE, test_set_RMSE) == (5.52111626057998, 5.581885926716189). 
+- The difference in RMSE between the training set and the test set has decreased, which means **the model predicts better on unseen data**, but overall they are still high in the sense that 5 steps are 1/2 of the average steps we typically see! 
+- Therefore, **the Linear Regression Model may be essentially not suitable for this predition**, such that feature transforming does not help. Reasons for that may be the relationship between the features and the number of steps (n_steps) is not linear, and the fact that there is not really a lot of options of hyperparameters to choose from (if any).
+
+--- 
+To combat those limitations, **I will use a Decision Tree Regressor as the final model** since it can **also** capture **non-linear relationships** between features and n_steps and I will be able to find and use the **best hyperparameter(s)** to prevent one of its disadvantages -- overfitting/not general enough, to some extent.
+
+The hyperparameters I plan to tune are **"max_depth"** and **"min_samples_split"**.
+- we want to have the best "max_depth" so that the model will not underfit or overfit. It underfits when there is not a sufficient amount of qustions being asked, i.e., the depth of the tree is not deep enough. It overfits when there are too many questions being asked, whose answers were **memorized and considered to be the correct response values** such that the questions will separate the data points in unexpected complicated (not general) way.
+
+- We want to have the best min_samples_split. min_samples_split helps control the complexity of the decision tree model since it **specifies the minimum number of samples required to split an internal node**. The larger it is, it is more general, but it can underfit. The smaller it is, the more complicated it is, so it can overfit. Therefore, it is so important to find a balance here! Also, the best min_samples_split should make the model general enough that **there is a concrete set of rules that predicts their relationships*.
+
+By using **GridSearchCV** over a list of hyperparameter options,
+
+```py
+hp = {
+    'max_depth': [2, 3, 4, 5, 7, 10, 13, 15, 18, 20, None], 
+    'min_samples_split': [2, 5, 10, 20, 50, 100, 200]
+}
+```
+The best hyperparameter for "max_depth" is 10, and 200 for "min_samples_split".
+
+By training the dataset using the optimal hyperparameters, (train_set_RMSE, test_set_RMSE) reduces to (5.374887598821211, 5.492137521112). 
+
+Compared to the baseline model, the **RMSE overall has decreased by around 0.4-0.5**, from which we can see that the model performance has improved by some extent by using a new regression model and doing feature transformations. The difference between RMSE for the training set and the test set has increased, but even though the problem of **overfitting, which is one of the natural disadvantages of a Decision Tree, is moderately more explicit, the model does optimize accuracy overall!**
+
 ## Fairness Analysis
+<!-- #endregion -->
 
 ```python
 
