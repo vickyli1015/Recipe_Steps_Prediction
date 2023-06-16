@@ -138,6 +138,7 @@ By exploring the frequency of some possible values for *average rating*, we foun
 ```py
 recipes['average_rating'].value_counts().iloc[:10]
 ```
+
 | Value    | Count |
 |----------|-------|
 | 5.000000 | 47784 |
@@ -155,6 +156,7 @@ recipes['average_rating'].value_counts().iloc[:10]
 ```py
 recipes['average_rating'].value_counts().iloc[-10:]
 ```
+
 | Value    | Count |
 |----------|-------|
 | 4.280000 | 1     |
