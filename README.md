@@ -1,7 +1,7 @@
 <!-- #region -->
 by Vicky Li: <yil164@ucsd.edu>
 
-Our exploratory data analysis on this dataset can be found [here](https://vickyli1015.github.io/Recipes-Rating-Analysis/).
+Our exploratory data analysis (EDA) on this dataset can be found [here](https://vickyli1015.github.io/Recipes-Rating-Analysis/).
 
 # Framing the Problem
 
