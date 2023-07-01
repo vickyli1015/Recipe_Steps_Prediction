@@ -192,7 +192,7 @@ There are a lot of possibilities for average ratings, and the frequency of each 
 
 **Evaluation Metric**: since we care about how far off the predictions of number of steps are from the actual number of steps for recipes in both groups, we use RMSE.
 
-#### Hypothesis Set-Up:
+### Hypothesis Set-Up:
 
 - **Null Hypothesis**: Our model is fair. Its RMSE for high-rating recipes and not high-rating recipes are roughly the same, and any differences are due to random chance.
 - **Alternative Hypothesis**: Our model is unfair. Its RMSE for high-rating recipes is lower than its RMSE for not high-rating recipes. i.e., the model is more likely to predict the n_steps of high-rating recipes with smaller errors (RMSE).
@@ -201,7 +201,7 @@ There are a lot of possibilities for average ratings, and the frequency of each 
 
 **Significance Level**: 5%
 
-#### Permutaion Test
+### Permutaion Test
 During each permutation iteration out of the 1000 permutations:
 - I shuffle the average ratings randomly. By doing so, each recipe may now have a high/low average rating instead of being fixed.
 - I **predict the number of steps using the Final Model with features (minutes and number of ingredients) of recipes with high ratings and recipes with low ratings separately**. 
