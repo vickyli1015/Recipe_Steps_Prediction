@@ -1,14 +1,11 @@
 <!-- #region -->
-# Spice Up Your Models: Decoding Recipe Step Predictions
-Predicting the Number of Steps in a Recipe Using Models
-
 by Vicky Li: <yil164@ucsd.edu>
 
 Our exploratory data analysis on this dataset can be found [here](https://vickyli1015.github.io/Recipes-Rating-Analysis/).
 
-## Framing the Problem
+# Framing the Problem
 
-### Prediction problem of interest: 
+## Prediction problem of interest: 
 
 Predict the **number of steps in recipes** using features from the combined data frame containing recipes and ratings.
 
@@ -16,7 +13,7 @@ Since number of steps is a quantitative variable, this is a **regression problem
 
 For this question, I am going to use **RMSE** as the metric to evaluate the model. It comes with the **same unit of the response variable (n_steps)**, making it easier to interpret with context. For example, if RMSE = 3, that means the **average magnitude of the residuals**, i.e, the mean error that this model has for predicting the number of steps involved is around 3 **steps**! Also, it is useful since we want to prioritize reducing larger deviations, which is also why I prefer RMSE more than metrics like R-sqaured. Since our model is not a classifier, metrics like F1-score and precision does not work here.
 
-## Baseline Model
+# Baseline Model
 
 (Note: the statistics mentioned below may be different in the notebook since I rerun the whole notebook before submission, but you the typically follow the same trend described below)
 
@@ -53,7 +50,7 @@ apparently most of the recipes have a number of steps <= 13, which means a RMSE 
 
 Since the model is underfitting that much that it mis-predicts 1/2 of the mean number of steps, I would say that **the model is not good enough** and there is absolutely a better model out there.
 
-## Final Model
+# Final Model
 
 For the final model, I started off by transforming the features present in the baseline model. 
 
@@ -139,7 +136,7 @@ By training the model using the optimal hyperparameters, (train_set_RMSE, test_s
 Compared to the baseline model, the **RMSE overall has decreased by around 0.4-0.5 (steps)**, from which we can see that the model performance has improved by some extent by using a new regression model and doing feature transformations that address for effects of outliers. The difference between RMSE for the training set and the test set has increased, but even though the problem of **overfitting, which is one of the natural disadvantages of a Decision Tree, is moderately more explicit, the model does optimize accuracy overall!**
 
 
-## Fairness Analysis
+# Fairness Analysis
 
 By exploring the frequency of some possible values for *average rating*, we found that there are high rating values ((average rating >= 4) with high frequency, but there are also high rating values that has low frequency. The same applies for lower ratings values (average rating < 4)
 
@@ -192,7 +189,7 @@ There are a lot of possibilities for average ratings, and the frequency of each 
 
 **Evaluation Metric**: since we care about how far off the predictions of number of steps are from the actual number of steps for recipes in both groups, we use RMSE.
 
-### Hypothesis Set-Up:
+## Hypothesis Set-Up:
 
 - **Null Hypothesis**: Our model is fair. Its RMSE for high-rating recipes and not high-rating recipes are roughly the same, and any differences are due to random chance.
 - **Alternative Hypothesis**: Our model is unfair. Its RMSE for high-rating recipes is lower than its RMSE for not high-rating recipes. i.e., the model is more likely to predict the n_steps of high-rating recipes with smaller errors (RMSE).
@@ -201,7 +198,7 @@ There are a lot of possibilities for average ratings, and the frequency of each 
 
 **Significance Level**: 5%
 
-### Permutaion Test
+## Permutaion Test
 During each permutation iteration out of the 1000 permutations:
 - I shuffle the average ratings randomly. By doing so, each recipe may now have a high/low average rating instead of being fixed.
 - I **predict the number of steps using the Final Model with features (minutes and number of ingredients) of recipes with high ratings and recipes with low ratings separately**. 
