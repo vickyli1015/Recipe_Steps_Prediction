@@ -2,4 +2,4 @@ remote_theme: pages-themes/cayman@v0.2.0
 plugins:
 - jekyll-remote-theme
 title: Spice Up Your Models
-description: Decode Recipe Step Predictions by Using Several Models
+description: Decode Recipe Step Predictions: Predicting the Number of Steps in a Recipe Using Several Models
